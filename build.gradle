@@ -2,37 +2,16 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
-    id "net.covers1624.signing" version '1.0.0.2'
+    id 'org.ajoberstar.grgit' version '4.1.0'
 }
 
-group 'codechicken'
+group 'net.minecraftforge'
 archivesBaseName = 'DiffPatch'
-version '1.2.4'
+version = (grgit.describe(longDescr: true, tags: true) ?: 'unknown-unknown-unknown').split('-').with { "${it[0]}.${it[1]}" }
+println('Version: ' + version + ' Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 targetCompatibility = "1.8"
 sourceCompatibility = "1.8"
-
-def signProps = [:]
-if (System.getenv("KEY_STORE")) {
-    println "Using Env variables for jar signing."
-    signProps['keyStore'] = System.getenv("KEY_STORE")
-    file(System.getenv("KEY_STORE_PROPS")).withReader {
-        def props = new Properties()
-        props.load(it)
-        signProps.putAll(props)
-    }
-} else if (project.hasProperty('keyStore')) {
-    println "Using Project properties for jar signing."
-    signProps['keyStore'] = project.getProperty('keyStore')
-    signProps['storePass'] = project.getProperty('keyStorePass')
-    signProps['alias'] = project.getProperty('keyStoreAlias')
-    signProps['keyPass'] = project.getProperty('keyStoreKeyPass')
-} else {
-    println 'No signing secrets found, build will not be signed.'
-}
-
-version = "$version." + (System.getenv("BUILD_NUMBER") ?: "1")
-println "Starting build of ${archivesBaseName}, Version: ${version}"
 
 repositories {
     mavenLocal()
@@ -59,20 +38,6 @@ dependencies {
     shadow 'net.sf.jopt-simple:jopt-simple:5.0.4'
     gradleImplementation sourceSets.main.output
     gradleCompileOnly gradleApi()
-}
-
-signing {
-    if (!signProps.empty) {
-        jars {
-            sign jar
-            sign shadowJar
-
-            keyStore = signProps.keyStore
-            alias = signProps.alias
-            storePass = signProps.storePass
-            keyPass = signProps.keyPass
-        }
-    }
 }
 
 def commonManifest = {
@@ -119,13 +84,15 @@ task srcJar(type: Jar) {
 
 publishing {
     repositories {
-        if (System.getenv('MAVEN_PASS')) {
-            maven {
-                url "https://maven-upload.covers1624.net/"
+        maven {
+            if (project.hasProperty('forgeMavenPassword')) {
                 credentials {
-                    username 'covers1624'
-                    password System.getenv('MAVEN_PASS')
+                    username project.properties.forgeMavenUser
+                    password project.properties.forgeMavenPassword
                 }
+                url 'https://files.minecraftforge.net/maven/manage/upload'
+            } else {
+                url 'file://' + rootProject.file('repo').getAbsolutePath()
             }
         }
     }
