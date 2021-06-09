@@ -179,7 +179,10 @@ public class DiffOperation extends CliOperation<DiffOperation.DiffSummary> {
             if (outputPath.getType().isPipe() && outputPath.getFormat() == null) {
                 try (PrintWriter out = new PrintWriter(outputPath.open())) {
                     for (List<String> lines : patches.values()) {
-                        lines.forEach(out::println);
+                        lines.forEach(line -> {
+                            out.print(line);
+                            out.print(lineEnding);
+                        });
                     }
                 }
             } else if (outputPath.getFormat() != null) {
@@ -195,7 +198,8 @@ public class DiffOperation extends CliOperation<DiffOperation.DiffSummary> {
                 }
                 for (Map.Entry<String, List<String>> entry : patches.get().entrySet()) {
                     Path path = outputPath.toPath().resolve(entry.getKey());
-                    Files.write(makeParentDirs(path), entry.getValue());
+                    String patchFile = String.join(lineEnding, entry.getValue()) + lineEnding;
+                    Files.write(makeParentDirs(path), patchFile.getBytes(StandardCharsets.UTF_8));
                 }
             }
         }
