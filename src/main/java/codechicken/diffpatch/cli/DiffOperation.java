@@ -33,8 +33,14 @@ public class DiffOperation extends CliOperation<DiffOperation.DiffSummary> {
     private final boolean autoHeader;
     private final int context;
     private final OutputPath outputPath;
+    private final String lineEnding;
 
+    @Deprecated
     public DiffOperation(PrintStream logger, Consumer<PrintStream> helpCallback, boolean verbose, boolean summary, InputPath aPath, InputPath bPath, String aPrefix, String bPrefix, boolean autoHeader, int context, OutputPath outputPath) {
+        this(logger, helpCallback, verbose, summary, aPath, bPath, aPrefix, bPrefix, autoHeader, context, outputPath, System.lineSeparator());
+    }
+
+    private DiffOperation(PrintStream logger, Consumer<PrintStream> helpCallback, boolean verbose, boolean summary, InputPath aPath, InputPath bPath, String aPrefix, String bPrefix, boolean autoHeader, int context, OutputPath outputPath, String lineEnding) {
         super(logger, helpCallback, verbose);
         this.summary = summary;
         this.aPath = aPath;
@@ -44,6 +50,7 @@ public class DiffOperation extends CliOperation<DiffOperation.DiffSummary> {
         this.autoHeader = autoHeader;
         this.context = context;
         this.outputPath = outputPath;
+        this.lineEnding = lineEnding;
     }
 
     public static Builder builder() {
@@ -80,7 +87,7 @@ public class DiffOperation extends CliOperation<DiffOperation.DiffSummary> {
             if (!lines.isEmpty()) {
                 changes = true;
                 try (PrintWriter out = new PrintWriter(outputPath.open())) {
-                    out.println(String.join(System.lineSeparator(), lines) + System.lineSeparator());
+                    out.println(String.join(lineEnding, lines) + lineEnding);
                 }
             }
             if (this.summary) {
@@ -178,7 +185,7 @@ public class DiffOperation extends CliOperation<DiffOperation.DiffSummary> {
             } else if (outputPath.getFormat() != null) {
                 try (ArchiveWriter writer = outputPath.getFormat().createWriter(outputPath.open())) {
                     for (Map.Entry<String, List<String>> entry : patches.get().entrySet()) {
-                        String patchFile = String.join(System.lineSeparator(), entry.getValue()) + System.lineSeparator();
+                        String patchFile = String.join(lineEnding, entry.getValue()) + lineEnding;
                         writer.writeEntry(entry.getKey(), patchFile.getBytes(StandardCharsets.UTF_8));
                     }
                 }
@@ -338,6 +345,7 @@ public class DiffOperation extends CliOperation<DiffOperation.DiffSummary> {
         private OutputPath outputPath;
         private String aPrefix = "a/";
         private String bPrefix = "b/";
+        private String lineEnding = System.lineSeparator();
 
         private Builder() {
         }
@@ -445,6 +453,11 @@ public class DiffOperation extends CliOperation<DiffOperation.DiffSummary> {
             return outputPath(new OutputPath.PipePath(Objects.requireNonNull(output), Objects.requireNonNull(format)));
         }
 
+        public Builder lineEnding(String value) {
+            this.lineEnding = value;
+            return this;
+        }
+
         public DiffOperation build() {
             if (aPath == null) {
                 throw new IllegalStateException("aPath not set.");
@@ -455,7 +468,7 @@ public class DiffOperation extends CliOperation<DiffOperation.DiffSummary> {
             if (outputPath == null) {
                 throw new IllegalStateException("output not set.");
             }
-            return new DiffOperation(logger, helpCallback, verbose, summary, aPath, bPath, aPrefix, bPrefix, autoHeader, context, outputPath);
+            return new DiffOperation(logger, helpCallback, verbose, summary, aPath, bPath, aPrefix, bPrefix, autoHeader, context, outputPath, lineEnding);
         }
 
     }
