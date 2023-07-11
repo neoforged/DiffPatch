@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static codechicken.diffpatch.util.Utils.*;
@@ -29,7 +30,6 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
     private final boolean summary;
     private final InputPath basePath;
     private final InputPath patchesPath;
-    private final String aPrefix;
     private final String bPrefix;
     private final OutputPath outputPath;
     private final OutputPath rejectsPath;
@@ -41,14 +41,13 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
 
     @Deprecated
     public PatchOperation(PrintStream logger, Consumer<PrintStream> helpCallback, boolean verbose, boolean summary, InputPath basePath, InputPath patchesPath, String aPrefix, String bPrefix, OutputPath outputPath, OutputPath rejectsPath, float minFuzz, int maxOffset, PatchMode mode, String patchesPrefix) {
-        this(logger, helpCallback, verbose, summary, basePath, patchesPath, aPrefix, bPrefix, outputPath, rejectsPath, minFuzz, maxOffset, mode, patchesPrefix, System.lineSeparator());
+        this(logger, helpCallback, verbose ? Level.ALL : Level.WARNING, summary, basePath, patchesPath, aPrefix, bPrefix, outputPath, rejectsPath, minFuzz, maxOffset, mode, patchesPrefix, System.lineSeparator());
     }
-    private PatchOperation(PrintStream logger, Consumer<PrintStream> helpCallback, boolean verbose, boolean summary, InputPath basePath, InputPath patchesPath, String aPrefix, String bPrefix, OutputPath outputPath, OutputPath rejectsPath, float minFuzz, int maxOffset, PatchMode mode, String patchesPrefix, String lineEnding) {
-        super(logger, helpCallback, verbose);
+    private PatchOperation(PrintStream logger, Consumer<PrintStream> helpCallback, Level level, boolean summary, InputPath basePath, InputPath patchesPath, String aPrefix, String bPrefix, OutputPath outputPath, OutputPath rejectsPath, float minFuzz, int maxOffset, PatchMode mode, String patchesPrefix, String lineEnding) {
+        super(logger, helpCallback, level);
         this.summary = summary;
         this.basePath = basePath;
         this.patchesPath = patchesPath;
-        this.aPrefix = aPrefix;
         this.bPrefix = bPrefix;
         this.outputPath = outputPath;
         this.rejectsPath = rejectsPath;
@@ -66,11 +65,11 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
     @Override
     public Result<PatchesSummary> operate() throws IOException {
         if (!basePath.exists()) {
-            log("Err: Base file doesn't exist.");
+            log(Level.SEVERE, "Err: Base file doesn't exist.");
             return new Result<>(-1);
         }
         if (!patchesPath.exists()) {
-            log("Err: Patch file doesn't exist.");
+            log(Level.SEVERE, "Err: Patch file doesn't exist.");
             return new Result<>(-1);
         }
 
@@ -82,28 +81,28 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
         //Base path and patch path are both singular files.
         if (basePath.isFile() && patchesPath.isFile() && basePath.getFormat() == null && patchesPath.getFormat() == null) {
             if (outputPath.getFormat() != null) {
-                log("Err: Can't specify output format when patching regular file.");
+                log(Level.SEVERE, "Err: Can't specify output format when patching regular file.");
                 printHelp();
                 return new Result<>(-1);
             }
             if (outputPath.getType().isPath()) {
                 Path out = outputPath.toPath();
                 if (Files.exists(out) && !Files.isRegularFile(out)) {
-                    log("Err: Output already exists and is not a file.");
+                    log(Level.SEVERE, "Err: Output already exists and is not a file.");
                     printHelp();
                     return new Result<>(-1);
                 }
             }
             if (rejectsPath.exists()) {
                 if (rejectsPath.getFormat() != null) {
-                    log("Err: Can't specify reject format when patching regular file.");
+                    log(Level.SEVERE, "Err: Can't specify reject format when patching regular file.");
                     printHelp();
                     return new Result<>(-1);
                 }
                 if (rejectsPath.getType().isPath()) {
                     Path out = rejectsPath.toPath();
                     if (Files.exists(out) && !Files.isRegularFile(out)) {
-                        log("Err: Reject already exists and is not a file.");
+                        log(Level.SEVERE, "Err: Reject already exists and is not a file.");
                         printHelp();
                         return new Result<>(-1);
                     }
@@ -130,7 +129,7 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
         }
 
         if (outputPath.getType().isPipe() && outputPath.getFormat() == null) {
-            log("Err: Output detected as pipe but no format is specified.");
+            log(Level.SEVERE, "Err: Output detected as pipe but no format is specified.");
             printHelp();
             return new Result<>(-1);
         }
@@ -139,14 +138,14 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
             Path out = outputPath.toPath();
             if (outputPath.getFormat() != null) {
                 if (Files.exists(out) && !Files.isRegularFile(out)) {
-                    log("Err: Output already exists and is not a file.");
+                    log(Level.SEVERE, "Err: Output already exists and is not a file.");
                     printHelp();
                     return new Result<>(-1);
                 }
 
             } else {
                 if (Files.exists(out) && !Files.isDirectory(out)) {
-                    log("Err: Output already exists and is not a directory.");
+                    log(Level.SEVERE, "Err: Output already exists and is not a directory.");
                     printHelp();
                     return new Result<>(-1);
                 }
@@ -156,12 +155,12 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
         //Both inputs are still files, both must be archives.
         if (basePath.isFile() && patchesPath.isFile()) {
             if (basePath.getFormat() == null) {
-                log("Err: Base path is in an unknown archive format");
+                log(Level.SEVERE, "Err: Base path is in an unknown archive format");
                 printHelp();
                 return new Result<>(-1);
             }
             if (patchesPath.getFormat() == null) {
-                log("Err: Patches path is in an unknown archive format");
+                log(Level.SEVERE, "Err: Patches path is in an unknown archive format");
                 printHelp();
                 return new Result<>(-1);
             }
@@ -185,7 +184,7 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
                 Function<String, List<String>> patchFunc;
                 if (!basePath.isFile()) {
                     if (patchesPath.getFormat() == null) {
-                        log("Err: Patches file is in an unknown format, whilst Base file is a directory.");
+                        log(Level.SEVERE, "Err: Patches file is in an unknown format, whilst Base file is a directory.");
                         printHelp();
                         return new Result<>(-1);
                     }
@@ -199,7 +198,7 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
                     }
                 } else {
                     if (basePath.getFormat() == null) {
-                        log("Err: Base file is in an unknown format, whilst Patches file is a directory.");
+                        log(Level.SEVERE, "Err: Base file is in an unknown format, whilst Patches file is a directory.");
                         printHelp();
                         return new Result<>(-1);
                     }
@@ -296,7 +295,7 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
             PatchFile patchFile = patchFiles.get(file);
             List<String> lines = new ArrayList<>(patchFile.toLines(false));
             lines.add(0, "++++ Target missing");
-            verbose("Missing patch target for %s", patchFile.name);
+            log(Level.WARNING, "Missing patch target for %s", patchFile.name);
             rCollector.consume(patchFile.name, lines);
             result = false;
         }
@@ -306,7 +305,7 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
 
     public boolean doPatch(FileCollector outputCollector, FileCollector rejectCollector, PatchesSummary summary, String baseName, List<String> base, PatchFile patchFile, float minFuzz, int maxOffset, PatchMode mode) {
         Patcher patcher = new Patcher(patchFile, base, minFuzz, maxOffset);
-        verbose("Patching: " + baseName);
+        log(Level.FINE, "Patching: " + baseName);
         List<Patcher.Result> results = patcher.patch(mode).collect(Collectors.toList());
         List<String> rejectLines = new ArrayList<>();
         boolean first = true;
@@ -334,18 +333,21 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
             } else {
                 summary.failedMatches++;
             }
-            if (verbose) {
-                verbose(" Hunk %d: %s", i, result.summary());
-            }
+            
             if (!result.success) {
                 if (!first) {
                     rejectLines.add("");
+                } else if (Level.FINE.intValue() < this.level.intValue()) {
+                	log(Level.WARNING, "Patching: " + baseName);
                 }
+                log(Level.WARNING, " Hunk %d: %s", i, result.summary());
                 first = false;
                 rejectLines.add("++++ REJECTED HUNK: " + (i + 1));
                 rejectLines.add(result.patch.getHeader());
                 result.patch.diffs.stream().map(Diff::toString).forEach(rejectLines::add);
                 rejectLines.add("++++ END HUNK");
+            } else {
+                log(Level.FINE, " Hunk %d: %s", i, result.summary());	
             }
         }
         List<String> lines = patcher.lines;
@@ -486,7 +488,7 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
 
         private PrintStream logger = NULL_STREAM;
         private Consumer<PrintStream> helpCallback = NULL_CALLBACK;
-        private boolean verbose;
+        private Level level = Level.WARNING;
         private boolean summary;
         private InputPath basePath;
         private InputPath patchesPath;
@@ -519,8 +521,12 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
         }
 
         public Builder verbose(boolean verbose) {
-            this.verbose = verbose;
-            return this;
+        	return this.level(verbose ? Level.ALL : Level.WARNING);
+        }
+        
+        public Builder level(Level level) {
+        	this.level = level;
+        	return this;
         }
 
         public Builder summary(boolean summary) {
@@ -643,7 +649,7 @@ public class PatchOperation extends CliOperation<PatchOperation.PatchesSummary> 
             if (outputPath == null) {
                 throw new IllegalStateException("output not set.");
             }
-            return new PatchOperation(logger, helpCallback, verbose, summary, basePath, patchesPath, aPrefix, bPrefix, outputPath, rejectsPath, minFuzz, maxOffset, mode, patchesPrefix, lineEnding);
+            return new PatchOperation(logger, helpCallback, level, summary, basePath, patchesPath, aPrefix, bPrefix, outputPath, rejectsPath, minFuzz, maxOffset, mode, patchesPrefix, lineEnding);
         }
 
     }

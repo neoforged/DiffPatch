@@ -3,6 +3,7 @@ package codechicken.diffpatch.cli;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 /**
  * Created by covers1624 on 11/8/20.
@@ -12,12 +13,20 @@ public abstract class CliOperation<T> {
     protected final PrintStream logger;
 
     private final Consumer<PrintStream> helpCallback;
+    @Deprecated
     protected boolean verbose;
-
+    protected final Level level;
+    
+    @Deprecated
     protected CliOperation(PrintStream logger, Consumer<PrintStream> helpCallback, boolean verbose) {
+    	this(logger, helpCallback, verbose ? Level.ALL : Level.WARNING);
+    }
+    
+    protected CliOperation(PrintStream logger, Consumer<PrintStream> helpCallback, Level level) {
         this.logger = logger;
         this.helpCallback = helpCallback;
-        this.verbose = verbose;
+        this.level = level;
+        this.verbose = this.level == Level.ALL;
     }
 
     public abstract Result<T> operate() throws IOException;
@@ -26,13 +35,19 @@ public abstract class CliOperation<T> {
         helpCallback.accept(logger);
     }
 
+    @Deprecated
     public final void log(String str, Object... args) {
-        logger.println(String.format(str, args));
+        log(Level.INFO, str, args);
     }
 
+    @Deprecated
     public final void verbose(String str, Object... args) {
-        if (verbose) {
-            log(str, args);
+        log(Level.FINE, str, args);
+    }
+    
+    public final void log(Level level, String str, Object... args) {
+        if (this.level.intValue() >= level.intValue()) {
+            logger.println(String.format(str, args));
         }
     }
 
