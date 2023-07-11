@@ -16,12 +16,12 @@ public abstract class CliOperation<T> {
     @Deprecated
     protected boolean verbose;
     protected final Level level;
-    
+
     @Deprecated
     protected CliOperation(PrintStream logger, Consumer<PrintStream> helpCallback, boolean verbose) {
-    	this(logger, helpCallback, verbose ? Level.ALL : Level.WARNING);
+        this(logger, helpCallback, verbose ? Level.ALL : Level.WARNING);
     }
-    
+
     protected CliOperation(PrintStream logger, Consumer<PrintStream> helpCallback, Level level) {
         this.logger = logger;
         this.helpCallback = helpCallback;
@@ -44,9 +44,9 @@ public abstract class CliOperation<T> {
     public final void verbose(String str, Object... args) {
         log(Level.FINE, str, args);
     }
-    
+
     public final void log(Level level, String str, Object... args) {
-        if (this.level.intValue() >= level.intValue()) {
+        if (this.level.intValue() <= level.intValue()) {
             logger.println(String.format(str, args));
         }
     }
