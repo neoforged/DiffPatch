@@ -31,9 +31,9 @@ public class PatchOperationTests {
         Path cmp = tempDir.resolve("cmp");
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches");
-        copyResource("/data/orig/PatchFile.java", orig.resolve("PatchFile.java"));
-        copyResource("/data/src/PatchFile.java", cmp.resolve("PatchFile.java"));
-        copyResource("/data/patches/PatchFile.java.patch", patches.resolve("PatchFile.java.patch"));
+        copyResource("/data/orig/PatchFile.txt", orig.resolve("PatchFile.txt"));
+        copyResource("/data/src/PatchFile.txt", cmp.resolve("PatchFile.txt"));
+        copyResource("/data/patches/PatchFile.txt.patch", patches.resolve("PatchFile.txt.patch"));
         CliOperation.Result<PatchOperation.PatchesSummary> result = PatchOperation.builder()
                 .basePath(orig)
                 .outputPath(src)
@@ -41,9 +41,9 @@ public class PatchOperationTests {
                 .build()
                 .operate();
         assertEquals(0, result.exit);
-        assertTrue(Files.exists(src.resolve("PatchFile.java")));
-        List<String> output = Files.readAllLines(src.resolve("PatchFile.java"));
-        List<String> original = Files.readAllLines(cmp.resolve("PatchFile.java"));
+        assertTrue(Files.exists(src.resolve("PatchFile.txt")));
+        List<String> output = Files.readAllLines(src.resolve("PatchFile.txt"));
+        List<String> original = Files.readAllLines(cmp.resolve("PatchFile.txt"));
         assertEquals(output, original);
     }
 
@@ -54,8 +54,8 @@ public class PatchOperationTests {
         Path orig = tempDir.resolve("orig");
         Path src = tempDir.resolve("src.zip");
         Path patches = tempDir.resolve("patches");
-        copyResource("/data/orig/PatchFile.java", orig.resolve("PatchFile.java"));
-        copyResource("/data/patches/PatchFile.java.patch", patches.resolve("PatchFile.java.patch"));
+        copyResource("/data/orig/PatchFile.txt", orig.resolve("PatchFile.txt"));
+        copyResource("/data/patches/PatchFile.txt.patch", patches.resolve("PatchFile.txt.patch"));
         CliOperation.Result<PatchOperation.PatchesSummary> result = PatchOperation.builder()
                 .basePath(orig)
                 .outputPath(src)
@@ -76,8 +76,8 @@ public class PatchOperationTests {
         Path orig = tempDir.resolve("orig");
         Path src = tempDir.resolve("src.zip");
         Path patches = tempDir.resolve("patches");
-        copyResource("/data/orig/PatchFile.java", orig.resolve("PatchFile.java"));
-        copyResource("/data/patches/PatchFile.java.patch", patches.resolve("PatchFile.java.patch"));
+        copyResource("/data/orig/PatchFile.txt", orig.resolve("PatchFile.txt"));
+        copyResource("/data/patches/PatchFile.txt.patch", patches.resolve("PatchFile.txt.patch"));
         OutputStream os = Files.newOutputStream(src);
         CliOperation.Result<PatchOperation.PatchesSummary> result = PatchOperation.builder()
                 .basePath(orig)
@@ -101,8 +101,8 @@ public class PatchOperationTests {
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches");
         Path rejects = tempDir.resolve("rejects");
-        copyResource("/data/src/PatchFile.java", orig.resolve("PatchFile.java"));//Use src to simulate rejects
-        copyResource("/data/patches/PatchFile.java.patch", patches.resolve("PatchFile.java.patch"));
+        copyResource("/data/src/PatchFile.txt", orig.resolve("PatchFile.txt"));//Use src to simulate rejects
+        copyResource("/data/patches/PatchFile.txt.patch", patches.resolve("PatchFile.txt.patch"));
         CliOperation.Result<PatchOperation.PatchesSummary> result = PatchOperation.builder()
                 .basePath(orig)
                 .outputPath(src)
@@ -111,7 +111,7 @@ public class PatchOperationTests {
                 .build()
                 .operate();
         assertEquals(1, result.exit);
-        assertTrue(Files.exists(rejects.resolve("PatchFile.java.patch.rej")));
+        assertTrue(Files.exists(rejects.resolve("PatchFile.txt.patch.rej")));
     }
 
     @Test
@@ -122,8 +122,8 @@ public class PatchOperationTests {
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches");
         Path rejects = tempDir.resolve("rejects.zip");
-        copyResource("/data/src/PatchFile.java", orig.resolve("PatchFile.java"));//Use src to simulate rejects
-        copyResource("/data/patches/PatchFile.java.patch", patches.resolve("PatchFile.java.patch"));
+        copyResource("/data/src/PatchFile.txt", orig.resolve("PatchFile.txt"));//Use src to simulate rejects
+        copyResource("/data/patches/PatchFile.txt.patch", patches.resolve("PatchFile.txt.patch"));
         CliOperation.Result<PatchOperation.PatchesSummary> result = PatchOperation.builder()
                 .basePath(orig)
                 .outputPath(src)
@@ -146,8 +146,8 @@ public class PatchOperationTests {
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches");
         Path rejects = tempDir.resolve("rejects.zip");
-        copyResource("/data/src/PatchFile.java", orig.resolve("PatchFile.java"));//Use src to simulate rejects
-        copyResource("/data/patches/PatchFile.java.patch", patches.resolve("PatchFile.java.patch"));
+        copyResource("/data/src/PatchFile.txt", orig.resolve("PatchFile.txt"));//Use src to simulate rejects
+        copyResource("/data/patches/PatchFile.txt.patch", patches.resolve("PatchFile.txt.patch"));
         OutputStream os = Files.newOutputStream(rejects);
         CliOperation.Result<PatchOperation.PatchesSummary> result = PatchOperation.builder()
                 .basePath(orig)
@@ -172,9 +172,9 @@ public class PatchOperationTests {
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches");
         try (ArchiveWriter writer = ArchiveFormat.ZIP.createWriter(Files.newOutputStream(orig))) {
-            copyResource("/data/orig/PatchFile.java", writer, "PatchFile.java");
+            copyResource("/data/orig/PatchFile.txt", writer, "PatchFile.txt");
         }
-        copyResource("/data/patches/PatchFile.java.patch", patches.resolve("PatchFile.java.patch"));
+        copyResource("/data/patches/PatchFile.txt.patch", patches.resolve("PatchFile.txt.patch"));
         CliOperation.Result<PatchOperation.PatchesSummary> result = PatchOperation.builder()
                 .basePath(orig)
                 .outputPath(src)
@@ -182,7 +182,7 @@ public class PatchOperationTests {
                 .build()
                 .operate();
         assertEquals(0, result.exit);
-        assertTrue(Files.exists(src.resolve("PatchFile.java")));
+        assertTrue(Files.exists(src.resolve("PatchFile.txt")));
     }
 
     @Test
@@ -193,9 +193,9 @@ public class PatchOperationTests {
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches");
         try (ArchiveWriter writer = ArchiveFormat.ZIP.createWriter(Files.newOutputStream(orig))) {
-            copyResource("/data/orig/PatchFile.java", writer, "PatchFile.java");
+            copyResource("/data/orig/PatchFile.txt", writer, "PatchFile.txt");
         }
-        copyResource("/data/patches/PatchFile.java.patch", patches.resolve("PatchFile.java.patch"));
+        copyResource("/data/patches/PatchFile.txt.patch", patches.resolve("PatchFile.txt.patch"));
         CliOperation.Result<PatchOperation.PatchesSummary> result = PatchOperation.builder()
                 .basePath(Files.readAllBytes(orig), ArchiveFormat.ZIP)
                 .outputPath(src)
@@ -203,7 +203,7 @@ public class PatchOperationTests {
                 .build()
                 .operate();
         assertEquals(0, result.exit);
-        assertTrue(Files.exists(src.resolve("PatchFile.java")));
+        assertTrue(Files.exists(src.resolve("PatchFile.txt")));
     }
 
     @Test
@@ -213,9 +213,9 @@ public class PatchOperationTests {
         Path orig = tempDir.resolve("orig");
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches.zip");
-        copyResource("/data/orig/PatchFile.java", orig.resolve("PatchFile.java"));
+        copyResource("/data/orig/PatchFile.txt", orig.resolve("PatchFile.txt"));
         try (ArchiveWriter writer = ArchiveFormat.ZIP.createWriter(Files.newOutputStream(patches))) {
-            copyResource("/data/patches/PatchFile.java.patch", writer, "PatchFile.java.patch");
+            copyResource("/data/patches/PatchFile.txt.patch", writer, "PatchFile.txt.patch");
         }
         CliOperation.Result<PatchOperation.PatchesSummary> result = PatchOperation.builder()
                 .basePath(orig)
@@ -224,7 +224,7 @@ public class PatchOperationTests {
                 .build()
                 .operate();
         assertEquals(0, result.exit);
-        assertTrue(Files.exists(src.resolve("PatchFile.java")));
+        assertTrue(Files.exists(src.resolve("PatchFile.txt")));
     }
 
     @Test
@@ -234,9 +234,9 @@ public class PatchOperationTests {
         Path orig = tempDir.resolve("orig");
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches.zip");
-        copyResource("/data/orig/PatchFile.java", orig.resolve("PatchFile.java"));
+        copyResource("/data/orig/PatchFile.txt", orig.resolve("PatchFile.txt"));
         try (ArchiveWriter writer = ArchiveFormat.ZIP.createWriter(Files.newOutputStream(patches))) {
-            copyResource("/data/patches/PatchFile.java.patch", writer, "PatchFile.java.patch");
+            copyResource("/data/patches/PatchFile.txt.patch", writer, "PatchFile.txt.patch");
         }
         CliOperation.Result<PatchOperation.PatchesSummary> result = PatchOperation.builder()
                 .basePath(orig)
@@ -245,7 +245,7 @@ public class PatchOperationTests {
                 .build()
                 .operate();
         assertEquals(0, result.exit);
-        assertTrue(Files.exists(src.resolve("PatchFile.java")));
+        assertTrue(Files.exists(src.resolve("PatchFile.txt")));
     }
 
     private static void copyResource(String resource, Path to) throws IOException {

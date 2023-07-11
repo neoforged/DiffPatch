@@ -32,8 +32,8 @@ public class DiffOperationTests {
         Path orig = tempDir.resolve("orig");
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches");
-        copyResource("/data/orig/PatchFile.java", orig.resolve("PatchFile.java"));
-        copyResource("/data/src/PatchFile.java", src.resolve("PatchFile.java"));
+        copyResource("/data/orig/PatchFile.txt", orig.resolve("PatchFile.txt"));
+        copyResource("/data/src/PatchFile.txt", src.resolve("PatchFile.txt"));
         CliOperation.Result<DiffOperation.DiffSummary> result = DiffOperation.builder()
                 .aPath(orig)
                 .bPath(src)
@@ -41,7 +41,7 @@ public class DiffOperationTests {
                 .build()
                 .operate();
         assertEquals(1, result.exit);
-        assertTrue(Files.exists(patches.resolve("PatchFile.java.patch")));
+        assertTrue(Files.exists(patches.resolve("PatchFile.txt.patch")));
     }
 
     @Test
@@ -51,8 +51,8 @@ public class DiffOperationTests {
         Path orig = tempDir.resolve("orig");
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches.zip");
-        copyResource("/data/orig/PatchFile.java", orig.resolve("PatchFile.java"));
-        copyResource("/data/src/PatchFile.java", src.resolve("PatchFile.java"));
+        copyResource("/data/orig/PatchFile.txt", orig.resolve("PatchFile.txt"));
+        copyResource("/data/src/PatchFile.txt", src.resolve("PatchFile.txt"));
         CliOperation.Result<DiffOperation.DiffSummary> result = DiffOperation.builder()
                 .aPath(orig)
                 .bPath(src)
@@ -73,8 +73,8 @@ public class DiffOperationTests {
         Path orig = tempDir.resolve("orig");
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches.zip");
-        copyResource("/data/orig/PatchFile.java", orig.resolve("PatchFile.java"));
-        copyResource("/data/src/PatchFile.java", src.resolve("PatchFile.java"));
+        copyResource("/data/orig/PatchFile.txt", orig.resolve("PatchFile.txt"));
+        copyResource("/data/src/PatchFile.txt", src.resolve("PatchFile.txt"));
         OutputStream os = Files.newOutputStream(patches);
         CliOperation.Result<DiffOperation.DiffSummary> result = DiffOperation.builder()
                 .aPath(orig)
@@ -98,9 +98,9 @@ public class DiffOperationTests {
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches.zip");
         try (ArchiveWriter writer = ArchiveFormat.ZIP.createWriter(Files.newOutputStream(orig))) {
-            copyResource("/data/orig/PatchFile.java", writer, "PatchFile.java");
+            copyResource("/data/orig/PatchFile.txt", writer, "PatchFile.txt");
         }
-        copyResource("/data/src/PatchFile.java", src.resolve("PatchFile.java"));
+        copyResource("/data/src/PatchFile.txt", src.resolve("PatchFile.txt"));
         CliOperation.Result<DiffOperation.DiffSummary> result = DiffOperation.builder()
                 .aPath(orig)
                 .bPath(src)
@@ -122,9 +122,9 @@ public class DiffOperationTests {
         Path src = tempDir.resolve("src");
         Path patches = tempDir.resolve("patches.zip");
         try (ArchiveWriter writer = ArchiveFormat.ZIP.createWriter(Files.newOutputStream(orig))) {
-            copyResource("/data/orig/PatchFile.java", writer, "PatchFile.java");
+            copyResource("/data/orig/PatchFile.txt", writer, "PatchFile.txt");
         }
-        copyResource("/data/src/PatchFile.java", src.resolve("PatchFile.java"));
+        copyResource("/data/src/PatchFile.txt", src.resolve("PatchFile.txt"));
         CliOperation.Result<DiffOperation.DiffSummary> result = DiffOperation.builder()
                 .aPath(Files.readAllBytes(orig), ArchiveFormat.ZIP)
                 .bPath(src)
@@ -145,9 +145,9 @@ public class DiffOperationTests {
         Path orig = tempDir.resolve("orig");
         Path src = tempDir.resolve("src.zip");
         Path patches = tempDir.resolve("patches.zip");
-        copyResource("/data/orig/PatchFile.java", orig.resolve("PatchFile.java"));
+        copyResource("/data/orig/PatchFile.txt", orig.resolve("PatchFile.txt"));
         try (ArchiveWriter writer = ArchiveFormat.ZIP.createWriter(Files.newOutputStream(src))) {
-            copyResource("/data/src/PatchFile.java", writer, "PatchFile.java");
+            copyResource("/data/src/PatchFile.txt", writer, "PatchFile.txt");
         }
         CliOperation.Result<DiffOperation.DiffSummary> result = DiffOperation.builder()
                 .aPath(orig)
@@ -169,9 +169,9 @@ public class DiffOperationTests {
         Path orig = tempDir.resolve("orig");
         Path src = tempDir.resolve("src.zip");
         Path patches = tempDir.resolve("patches.zip");
-        copyResource("/data/orig/PatchFile.java", orig.resolve("PatchFile.java"));
+        copyResource("/data/orig/PatchFile.txt", orig.resolve("PatchFile.txt"));
         try (ArchiveWriter writer = ArchiveFormat.ZIP.createWriter(Files.newOutputStream(src))) {
-            copyResource("/data/src/PatchFile.java", writer, "PatchFile.java");
+            copyResource("/data/src/PatchFile.txt", writer, "PatchFile.txt");
         }
         CliOperation.Result<DiffOperation.DiffSummary> result = DiffOperation.builder()
                 .aPath(orig)
