@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'net.minecraftforge.gradleutils' version '2.+'
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group 'net.minecraftforge'
@@ -87,10 +87,8 @@ shadowJar {
     }
 }
 
-task srcJar(type: Jar) {
-    classifier 'sources'
-    from sourceSets.main.allSource
-    from file("LICENSE.txt")
+java {
+    withSourcesJar()
 }
 
 publishing {
@@ -103,8 +101,6 @@ publishing {
             artifactId project.archivesBaseName
             version project.version
             from components['java']
-            artifact shadowJar
-            artifact srcJar
 
             pom {
                 name = archivesBaseName
