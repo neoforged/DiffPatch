@@ -1,12 +1,15 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'net.minecraftforge.gradleutils' version '2.+'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'net.neoforged.gradleutils' version '2.+'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
-group 'net.minecraftforge'
-archivesBaseName = 'DiffPatch'
+group = 'net.neoforged'
+
+base {
+    archivesName = 'DiffPatch'
+}
 
 version = gradleutils.getTagOffsetVersion()
 println('Version: ' + version + ' Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
@@ -18,8 +21,6 @@ ext {
 }
 
 repositories {
-    mavenLocal()
-    jcenter()
     mavenCentral()
 }
 
@@ -106,21 +107,21 @@ publishing {
                 name = archivesBaseName
                 description = archivesBaseName
                 //The publish plugin doesnt like GString's here apparently..
-                url = "https://github.com/TheCBProject/${archivesBaseName}".toString()
+                url = "https://github.com/neoforged/${base.archivesName.get()}".toString()
                 scm {
-                    url = "https://github.com/TheCBProject/${archivesBaseName}".toString()
-                    connection = "scm:git:git://github.com/TheCBProject/${archivesBaseName}.git".toString()
-                    connection = "scm:git:git@github.com:TheCBProject/${archivesBaseName}.git".toString()
+                    url = "https://github.com/neoforged/${base.archivesName.get()}".toString()
+                    connection = "scm:git:git://github.com/neoforged/${base.archivesName.get()}.git".toString()
+                    connection = "scm:git:git@github.com:neoforged/${base.archivesName.get()}.git".toString()
                 }
 
                 issueManagement {
                     system = 'github'
-                    url = "https://github.com/TheCBProject/${archivesBaseName}/issues".toString()
+                    url = "https://github.com/neoforged/${base.archivesName.get()}/issues".toString()
                 }
                 licenses {
                     license {
                         name = "MIT"
-                        url = "https://raw.githubusercontent.com/TheCBProject/DiffPatch/master/LICENSE.txt"
+                        url = "https://raw.githubusercontent.com/neoforged/DiffPatch/master/LICENSE.txt"
                         distribution = 'repo'
                     }
                 }
